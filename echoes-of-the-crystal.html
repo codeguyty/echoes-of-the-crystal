@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Echoes of the Crystal</title><style>html,body{margin:0;background:#101b2d;color:white;font-family:monospace;overflow:hidden}#game{width:100vw;height:100dvh;display:flex;align-items:center;justify-content:center}canvas{touch-action:none}</style><script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.86.0/phaser.min.js"></script></head><body><div id="game"></div><script>
+class Village extends Phaser.Scene {
+ constructor(){super('Village');this.held={};this.dialogue=false;this.crystalSeen=false;}
+ create(){
+  const g=this.add.graphics();
+  g.fillStyle(0x4c9254).fillRect(0,0,320,240);
+  g.fillStyle(0xbfa47b).fillRect(145,0,34,240).fillRect(0,106,320,30);
+  for(let i=0;i<18;i++){let x=(i*71+23)%310,y=(i*53+19)%195;if(x>135&&x<185||y>97&&y<144)continue;g.fillStyle(0x235d36).fillRect(x,y,15,14);g.fillStyle(0x388347).fillRect(x+3,y-5,9,12);}
+  this.house(g,35,36);this.house(g,229,37);
+  g.fillStyle(0x79749e).fillRect(244,172,42,36);g.fillStyle(0x4b416f).fillRect(249,177,32,25);
+  g.fillStyle(0x46d9f5).fillTriangle(265,164,253,186,277,186);g.fillStyle(0x9df5ff).fillTriangle(265,166,265,184,257,184);
+  this.add.text(265,215,'CRYSTAL',{fontSize:'8px',color:'#ffffff'}).setOrigin(.5);
+  this.npc=this.add.rectangle(106,116,12,17,0xe7b34e).setStrokeStyle(2,0x51372e);
+  this.add.text(106,99,'ELDER',{fontSize:'8px'}).setOrigin(.5);
+  this.player=this.add.rectangle(160,183,12,16,0x4988ff).setStrokeStyle(2,0x17284e);
+  this.add.text(160,6,'ECHOES OF THE CRYSTAL',{fontSize:'12px',color:'#fff4ba',backgroundColor:'#243653',padding:{x:4,y:3}}).setOrigin(.5,0);
+  this.quest=this.add.text(7,27,'QUEST: Speak to the Elder',{fontSize:'9px',backgroundColor:'#172a36',padding:{x:3,y:3}});
+  this.dialog=this.add.text(12,166,'',{fontSize:'10px',color:'#fff',wordWrap:{width:282},backgroundColor:'#17263d',padding:{x:9,y:8}}).setVisible(false).setDepth(10);
+  const keys=this.input.keyboard.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,SPACE');this.keys=keys;
+  this.makeButton(32,204,'◀','left');this.makeButton(90,204,'▶','right');this.makeButton(61,177,'▲','up');this.makeButton(61,230,'▼','down');
+  const action=this.add.rectangle(284,209,48,38,0x6e446e,.85).setStrokeStyle(2,0xe0b4ee).setInteractive();this.add.text(284,209,'TALK',{fontSize:'11px'}).setOrigin(.5);action.on('pointerdown',()=>this.interact());
+ }
+ house(g,x,y){g.fillStyle(0x72503e).fillRect(x,y+12,53,42);g.fillStyle(0xa64f47).fillTriangle(x-5,y+14,x+26,y-7,x+58,y+14);g.fillStyle(0x3d2c29).fillRect(x+22,y+33,12,21);g.fillStyle(0xd1e8e5).fillRect(x+6,y+22,12,11);}
+ makeButton(x,y,label,key){let b=this.add.rectangle(x,y,42,25,0x293e55,.82).setStrokeStyle(1,0x91b9d1).setInteractive();this.add.text(x,y,label,{fontSize:'16px'}).setOrigin(.5);b.on('pointerdown',()=>this.held[key]=true);b.on('pointerup',()=>this.held[key]=false);b.on('pointerout',()=>this.held[key]=false);}
+ interact(){if(this.dialogue){this.dialogue=false;this.dialog.setVisible(false);return;}let x=this.player.x,y=this.player.y;
+  if(Phaser.Math.Distance.Between(x,y,106,116)<38){this.show('ELDER: The crystal is fading. Seek the shrine to the southeast.');this.quest.setText('QUEST: Inspect the crystal');}
+  else if(Phaser.Math.Distance.Between(x,y,265,188)<38){this.crystalSeen=true;this.show('The crystal hums softly... A mysterious adventure begins!');this.quest.setText('QUEST COMPLETE: Crystal found!');}
+  else this.show('Nothing to interact with here.');}
+ show(s){this.dialogue=true;this.dialog.setText(s+'\nTap TALK to close.').setVisible(true);}
+ update(_,delta){if(Phaser.Input.Keyboard.JustDown(this.keys.SPACE)){this.interact();}if(this.dialogue)return;let dx=Number(this.held.right||this.keys.D.isDown||this.keys.RIGHT.isDown)-Number(this.held.left||this.keys.A.isDown||this.keys.LEFT.isDown);let dy=Number(this.held.down||this.keys.S.isDown||this.keys.DOWN.isDown)-Number(this.held.up||this.keys.W.isDown||this.keys.UP.isDown);let len=Math.hypot(dx,dy)||1;this.player.x=Phaser.Math.Clamp(this.player.x+dx/len*90*delta/1000,8,312);this.player.y=Phaser.Math.Clamp(this.player.y+dy/len*90*delta/1000,47,232);}
+}
+new Phaser.Game({type:Phaser.AUTO,parent:'game',width:320,height:240,pixelArt:true,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[Village]});
+</script></body></html>
