@@ -1,7 +1,7 @@
 entrypoint = "index.js"
 
 hidden = [".config"]
-modules = ["python-base-3.13"]
+modules = ["python-base-3.13", "nodejs-24"]
 
 [interpreter]
 command = [
