@@ -100,13 +100,13 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python3 -c \"import http.server,socketserver; H=type('H',(http.server.SimpleHTTPRequestHandler,),{'do_GET':lambda self: (setattr(self,'path','/echoes-of-the-crystal.html') if self.path=='/' else None, http.server.SimpleHTTPRequestHandler.do_GET(self))}); socketserver.TCPServer(('',5000),H).serve_forever()\""
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 -m http.server 5000 --bind 0.0.0.0"
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000

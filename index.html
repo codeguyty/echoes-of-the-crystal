@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Echoes of the Crystal — 16-bit Edition</title>
+<style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101626;touch-action:none}#game{width:100vw;height:100dvh;display:flex;justify-content:center;align-items:center}canvas{display:block;image-rendering:pixelated;touch-action:none}</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.86.0/phaser.min.js"></script></head><body><div id="game"></div><script>
+const W=384,H=256;
+class Village extends Phaser.Scene {
+ constructor(){super('Village');this.held={};this.dialogueOpen=false;this.crystalFound=false;this.facing='down';}
+ makeTexture(name,w,h,draw){const t=this.textures.createCanvas(name,w,h);const c=t.context;c.imageSmoothingEnabled=false;draw(c);t.refresh();}
+ rect(c,x,y,w,h,color){c.fillStyle=color;c.fillRect(x,y,w,h);}
+ createArt(){
+  this.makeTexture('hero',16,24,c=>{const r=(...a)=>this.rect(c,...a);r(5,1,6,3,'#3c2735');r(4,4,8,6,'#d89d68');r(3,4,2,6,'#493043');r(11,4,2,6,'#493043');r(5,7,2,1,'#25283e');r(9,7,2,1,'#25283e');r(4,10,8,8,'#2c6e9c');r(6,11,4,5,'#d8c27a');r(2,11,2,6,'#d89d68');r(12,11,2,6,'#d89d68');r(4,18,4,5,'#393449');r(9,18,4,5,'#393449');r(3,22,5,2,'#25212e');r(9,22,5,2,'#25212e');});
+  this.makeTexture('elder',16,24,c=>{const r=(...a)=>this.rect(c,...a);r(4,1,8,5,'#d5d2c8');r(4,5,8,7,'#dba77e');r(5,8,2,1,'#293043');r(9,8,2,1,'#293043');r(5,11,6,5,'#e9e6da');r(3,13,10,9,'#724b8c');r(1,15,3,7,'#dba77e');r(12,15,3,7,'#dba77e');r(4,22,4,2,'#352a3c');r(9,22,4,2,'#352a3c');});
+  this.makeTexture('tree',32,40,c=>{const r=(...a)=>this.rect(c,...a);r(13,25,7,14,'#765035');r(5,13,23,19,'#224f39');r(1,17,30,9,'#2d6843');r(7,4,19,22,'#347d4b');r(11,1,13,8,'#48965a');r(4,14,8,6,'#48965a');r(15,7,8,5,'#60a766');r(23,16,5,5,'#245b3c');});
+  this.makeTexture('house',72,64,c=>{const r=(...a)=>this.rect(c,...a);r(7,23,58,39,'#6c5149');r(11,26,50,33,'#a47b5d');r(1,22,70,7,'#513c48');r(7,11,58,14,'#87434d');r(14,5,44,8,'#a6555a');r(21,0,30,7,'#b96763');for(let i=0;i<6;i++)r(12+i*9,17,6,3,'#ce7b67');r(14,34,14,15,'#3c5262');r(16,36,10,10,'#a8d8d2');r(43,36,16,26,'#463641');r(55,49,2,2,'#e5c17a');r(9,59,54,4,'#4c393d');});
+  this.makeTexture('crystal',24,32,c=>{const r=(...a)=>this.rect(c,...a);r(6,27,13,4,'#55576a');r(9,3,7,23,'#2755a7');r(6,9,13,13,'#378bc8');r(11,1,4,24,'#8be9f2');r(8,9,3,11,'#55d6ec');r(16,12,3,8,'#245cbb');r(10,26,7,2,'#b1eaf1');});
+  this.makeTexture('flower',8,8,c=>{const r=(...a)=>this.rect(c,...a);r(3,3,2,5,'#28623d');r(1,2,6,3,'#f3c6e4');r(3,0,2,7,'#f3c6e4');r(3,3,2,2,'#f8d76e');});
+ }
+ create(){this.createArt();this.cameras.main.setBackgroundColor('#18253c');
+  const g=this.add.graphics();g.fillStyle(0x61975b).fillRect(0,0,W,192);
+  // Grass checker texture and path tiles
+  for(let y=0;y<192;y+=8)for(let x=0;x<W;x+=8){if((x/8+y/8)%3===0)g.fillStyle(0x669e60).fillRect(x,y,8,8);}
+  g.fillStyle(0xc6ad80).fillRect(169,0,46,192).fillRect(0,91,W,34);
+  g.fillStyle(0xd5bf91);for(let y=4;y<192;y+=16){g.fillRect(171,y,42,2);}for(let x=4;x<W;x+=16)g.fillRect(x,94,9,2);
+  g.lineStyle(1,0xb1976f,0.45);for(let y=0;y<192;y+=16)g.lineBetween(169,y,215,y);for(let x=0;x<W;x+=16)g.lineBetween(x,91,x,125);
+  for(const [x,y] of [[5,2],[80,3],[310,3],[342,45],[4,138],[55,142],[310,140],[351,143]])this.add.image(x,y,'tree').setOrigin(0,0);
+  this.add.image(36,20,'house').setOrigin(0,0);this.add.image(269,19,'house').setOrigin(0,0);
+  for(const [x,y] of [[120,36],[130,51],[244,49],[259,68],[31,166],[93,164],[286,163],[337,175],[146,13]])this.add.image(x,y,'flower').setOrigin(0,0);
+  this.crystal=this.add.image(323,150,'crystal');this.tweens.add({targets:this.crystal,alpha:{from:.72,to:1},y:147,duration:1100,yoyo:true,repeat:-1});
+  this.elder=this.add.image(190,72,'elder').setOrigin(.5,1);
+  this.player=this.add.image(190,139,'hero').setOrigin(.5,1);this.playerX=190;this.playerY=139;
+  this.add.rectangle(W/2,10,W,20,0x18233c,.95);this.add.text(W/2,10,'ECHOES OF THE CRYSTAL',{fontFamily:'monospace',fontSize:'12px',color:'#f7dfa0',fontStyle:'bold'}).setOrigin(.5);
+  this.questBg=this.add.rectangle(91,32,178,17,0x1b2a3e,.92);this.quest=this.add.text(7,26,'QUEST: Investigate the crystal',{fontFamily:'monospace',fontSize:'9px',color:'#ffffff'});
+  this.add.rectangle(W/2,224,W,64,0x1b263c).setStrokeStyle(2,0xb3a4cb);
+  this.add.text(192,198,'D-PAD: MOVE    ACTION: TALK',{fontFamily:'monospace',fontSize:'9px',color:'#e3d9bb'}).setOrigin(.5);
+  this.addControls();
+  this.dialogueBox=this.add.rectangle(W/2,157,W-18,62,0x18243c,.98).setStrokeStyle(2,0xe5d7a2).setVisible(false).setDepth(20);
+  this.dialogueText=this.add.text(19,132,'',{fontFamily:'monospace',fontSize:'11px',color:'#ffffff',wordWrap:{width:W-38},lineSpacing:3}).setVisible(false).setDepth(21);
+  this.add.text(190,77,'ELDER',{fontFamily:'monospace',fontSize:'8px',color:'#ffffff'}).setOrigin(.5);
+  this.cursors=this.input.keyboard?.createCursorKeys();this.keys=this.input.keyboard?.addKeys('W,A,S,D,SPACE');
+  this.input.on('gameout',()=>{this.held={};});
+ }
+ addControls(){const btn=(x,y,label,key,w=32,h=21)=>{const b=this.add.rectangle(x,y,w,h,0x43536f).setStrokeStyle(1,0xaab8d0).setInteractive();const t=this.add.text(x,y,label,{fontFamily:'monospace',fontSize:'13px',color:'#ffffff'}).setOrigin(.5);b.on('pointerdown',()=>{if(key==='action')this.action();else this.held[key]=true;});b.on('pointerup',()=>{this.held[key]=false;});b.on('pointerout',()=>{this.held[key]=false;});return b;};btn(66,209,'▲','up');btn(34,231,'◀','left');btn(66,231,'▼','down');btn(98,231,'▶','right');btn(324,225,'TALK','action',76,37);}
+ showDialogue(message){this.dialogueOpen=true;this.dialogueBox.setVisible(true);this.dialogueText.setText(message).setVisible(true);}
+ action(){if(this.dialogueOpen){this.dialogueOpen=false;this.dialogueBox.setVisible(false);this.dialogueText.setVisible(false);return;}
+  const dist=(x,y)=>Math.hypot(this.playerX-x,this.playerY-y);
+  if(dist(323,150)<48){this.crystalFound=true;this.quest.setText('QUEST COMPLETE: Crystal found!');this.showDialogue('The crystal glows! An ancient voice whispers: The journey begins...');}
+  else if(dist(190,72)<51)this.showDialogue(this.crystalFound?'ELDER: You found it! Our village has hope again.':'ELDER: The crystal east of town is fading. Please investigate!');
+  else this.showDialogue('There is nobody nearby to speak with.');
+ }
+ update(_time,delta){if(this.dialogueOpen)return;const c=this.cursors,k=this.keys;let dx=0,dy=0;
+  if(this.held.left||c?.left.isDown||k?.A.isDown)dx--;if(this.held.right||c?.right.isDown||k?.D.isDown)dx++;if(this.held.up||c?.up.isDown||k?.W.isDown)dy--;if(this.held.down||c?.down.isDown||k?.S.isDown)dy++;
+  if(dx||dy){const len=Math.hypot(dx,dy);const speed=Math.min(delta,40)*.085;this.playerX=Phaser.Math.Clamp(this.playerX+dx/len*speed,9,W-9);this.playerY=Phaser.Math.Clamp(this.playerY+dy/len*speed,50,188);this.player.setPosition(Math.round(this.playerX),Math.round(this.playerY));this.player.setFlipX(dx<0);this.player.setScale(1+Math.sin(this.time.now/100)*.025,1);}
+  else this.player.setScale(1);
+  if(Phaser.Input.Keyboard.JustDown(k?.SPACE))this.action();
+ }
+}
+new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,pixelArt:true,roundPixels:true,backgroundColor:'#18253c',scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[Village],render:{antialias:false}});
+</script></body></html>
