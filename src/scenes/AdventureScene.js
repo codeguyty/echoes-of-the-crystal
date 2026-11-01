@@ -1,5 +1,27 @@
 // Existing V9.1 scene preserved unchanged during structural extraction.
 class Adventure extends Phaser.Scene {
+  /** Load licensed artwork before Phaser creates the scene. */
+  preload() {
+    Object.entries(GAME_ART.forest).forEach(([name, path]) => {
+      this.load.image(`forest-${name}`, path);
+    });
+    Object.entries(GAME_ART.hero).forEach(([name, path]) => {
+      if (name.startsWith('walk')) {
+        // Six 32×32 frames form each walking animation strip.
+        this.load.spritesheet(`art-${name}`, path, {
+          frameWidth: 32,
+          frameHeight: 32,
+        });
+      } else {
+        this.load.image(`art-${name}`, path);
+      }
+    });
+    // Preloaded for future mountain maps; V9.2a does not render these yet.
+    Object.entries(GAME_ART.mountain).forEach(([name, path]) => {
+      this.load.image(`mountain-${name}`, path);
+    });
+  }
+
   /** Initialize player progression, quest state, inventory, and scene flags. These defaults are used for a new game. */
   constructor() {
     super('Adventure');
@@ -269,12 +291,30 @@ class Adventure extends Phaser.Scene {
   }
   /** Place a tree and its collision area. */
   addTree(x, y) {
-    this.add.image(x, y, 'tree').setDepth(y + 35);
+    // Keep the original collision wall, changing only the forest artwork.
+    const treeKey = this.place === 'woods'
+      ? ((Math.round(x + y) % 2 === 0) ? 'forest-pinkTree' : 'forest-orangeTree')
+      : 'tree';
+    this.add.image(x, y, treeKey).setDepth(y + 35);
     this.addWall(x - 15, y + 7, 30, 17)
   }
   /** Spawn the player sprite and configure the camera to follow it. */
+  /** Update the sprite while retaining the original movement and collision code. */
+  updateHeroArtwork(isMoving) {
+    if (!this.hero) return;
+    const direction = this.facing === 'up' ? 'Back'
+      : (this.facing === 'down' ? 'Front' : 'Side');
+    if (isMoving) {
+      const frame = Math.floor(this.step / 110) % 6;
+      this.hero.setTexture(`art-walk${direction}`, frame);
+    } else {
+      this.hero.setTexture(`art-idle${direction}`);
+    }
+    this.hero.setFlipX(this.facing === 'left');
+  }
+
   makeHero(x, y) {
-    this.hero = this.add.image(x, y, 'hero-down-0').setDepth(y + 1);
+    this.hero = this.add.image(x, y, 'art-idleFront').setDepth(y + 1);
     this.facing = 'down';
     this.step = 0;
     this.cameras.main.startFollow(this.hero, true, .15, .15);
@@ -986,10 +1026,10 @@ class Adventure extends Phaser.Scene {
       const nx = this.hero.x + dx * step, ny = this.hero.y + dy * step;
       if (!this.blocked(nx, this.hero.y)) this.hero.x = nx;
       if (!this.blocked(this.hero.x, ny)) this.hero.y = ny;
-      this.hero.setTexture(`hero-${this.facing}-${Math.floor(this.step/170)%2}`)
+      this.updateHeroArtwork(true)
     } else {
       this.step = 0;
-      this.hero.setTexture(`hero-${this.facing}-0`)
+      this.updateHeroArtwork(false)
     }
     this.hero.setDepth(this.hero.y + 1)
   }
