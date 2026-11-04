@@ -5,6 +5,10 @@ class Adventure extends Phaser.Scene {
     Object.entries(GAME_ART.forest).forEach(([name, path]) => {
       this.load.image(`forest-${name}`, path);
     });
+    // Small seamless terrain samples extracted from the licensed forest tileset.
+    Object.entries(GAME_ART.terrain).forEach(([name, path]) => {
+      this.load.image(`terrain-${name}`, path);
+    });
     Object.entries(GAME_ART.hero).forEach(([name, path]) => {
       if (name.startsWith('walk')) {
         // Six 32×32 frames form each walking animation strip.
@@ -910,13 +914,11 @@ class Adventure extends Phaser.Scene {
     this.clearPlace();
     this.place = 'woods';
     this.cameras.main.setBounds(0, 0, 640, 480);
-    this.add.tileSprite(0, 0, 640, 480, 'grass-detail').setOrigin(0).setTint(0x80a68a);
-    const path = this.add.graphics().setDepth(0);
-    path.fillStyle(0x9c936b);
-    path.fillRect(286, 0, 68, 480);
-    path.fillRect(0, 206, 640, 64);
-    path.fillStyle(0xc3b184);
-    for (let i = 0; i < 18; i++) path.fillRect(298 + (i % 3) * 12, i * 27, 7, 3);
+    // V9.2b: use terrain derived from the actual Ansimuz forest tileset.
+    // The existing cross-shaped route and encounter coordinates are unchanged.
+    this.add.tileSprite(0, 0, 640, 480, 'terrain-ground').setOrigin(0).setDepth(-2);
+    this.add.tileSprite(286, 0, 68, 480, 'terrain-path').setOrigin(0).setDepth(-1);
+    this.add.tileSprite(0, 206, 640, 64, 'terrain-path').setOrigin(0).setDepth(-1);
     for (let i = 0; i < 44; i++) {
       let tx = (i * 137 + 33) % 620 + 10, ty = (i * 91 + 17) % 445 + 15;
       if (Math.abs(tx - 320) > 58 && Math.abs(ty - 238) > 54) this.addTree(tx, ty)
@@ -925,6 +927,15 @@ class Adventure extends Phaser.Scene {
       let fx = (i * 83 + 19) % 610 + 15, fy = (i * 109 + 31) % 455 + 12;
       if (Math.abs(fx - 320) > 38) this.add.image(fx, fy, 'flower').setTint(0xc8a6eb)
     }
+    // Decorative objects do not change collisions or quest triggers.
+    const details = [
+      [75, 95, 'forest-bush'], [560, 105, 'forest-bush'],
+      [110, 345, 'forest-rock'], [540, 355, 'forest-rock'],
+      [175, 115, 'forest-bush'], [455, 405, 'forest-bush'],
+    ];
+    details.forEach(([dx, dy, texture]) => {
+      this.add.image(dx, dy, texture).setDepth(dy - 8);
+    });
     this.add.image(318, 35, 'crystal').setTint(0x99ffb0).setDepth(50);
     this.add.text(318, 13, 'MOSS ALTAR', {
       font: '11px monospace', color: '#ffedb0', stroke: '#172238', strokeThickness: 3

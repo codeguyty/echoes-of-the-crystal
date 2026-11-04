@@ -6,6 +6,10 @@ const GAME_ART = {
     bush: 'assets/game/forest/bush.png',
     rock: 'assets/game/forest/rock.png',
   },
+  terrain: {
+    ground: 'assets/game/forest/ground-autumn.png',
+    path: 'assets/game/forest/path-autumn.png',
+  },
   hero: {
     idleFront: 'assets/game/hero/idle-front.png',
     idleBack: 'assets/game/hero/idle-back.png',
