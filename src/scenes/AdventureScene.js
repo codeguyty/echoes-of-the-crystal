@@ -1,3 +1,4 @@
+import { createVillageBuildingTextures } from '../art/villageBuildings.js';
 // Existing V9.1 scene preserved unchanged during structural extraction.
 class Adventure extends Phaser.Scene {
   /** Load licensed artwork before Phaser creates the scene. */
@@ -114,29 +115,7 @@ class Adventure extends Phaser.Scene {
       R(c, 24, 2, 25, 20, '#68a669');
       R(c, 17, 20, 12, 8, '#75b075')
     });
-    make('house', 110, 110, c => {
-      R(c, 13, 34, 84, 72, '#503d3d');
-      R(c, 18, 37, 74, 62, '#ac8064');
-      R(c, 5, 29, 100, 13, '#55374a');
-      R(c, 12, 16, 86, 19, '#934f55');
-      R(c, 26, 6, 60, 14, '#b76965');
-      for (let x = 22; x < 90; x += 17) R(c, x, 27, 9, 4, '#e3a67c');
-      R(c, 28, 58, 22, 25, '#3a4854');
-      R(c, 31, 61, 16, 19, '#9ed0d5');
-      R(c, 65, 65, 22, 34, '#483439');
-      R(c, 83, 82, 3, 3, '#e8c777')
-    });
-    make('shop', 110, 110, c => {
-      R(c, 13, 34, 84, 72, '#4b403b');
-      R(c, 18, 37, 74, 62, '#b49a74');
-      R(c, 5, 29, 100, 13, '#375c62');
-      R(c, 12, 16, 86, 19, '#418e87');
-      R(c, 26, 6, 60, 14, '#70b7a4');
-      for (let x = 22; x < 90; x += 17) R(c, x, 27, 9, 4, '#e6d6a2');
-      R(c, 27, 57, 24, 24, '#9bd4d7');
-      R(c, 65, 65, 22, 34, '#483439');
-      R(c, 83, 82, 3, 3, '#f3d78e')
-    });
+    createVillageBuildingTextures(this);
     make('shrine', 72, 50, c => {
       R(c, 4, 36, 64, 12, '#8b91a6');
       R(c, 12, 26, 48, 12, '#bdc2cb');
