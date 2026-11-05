@@ -314,9 +314,19 @@ class Adventure extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, 960, 720);
     // V9.3: licensed pixel-art terrain, matched to the Whispering Woods style.
     // Preserve the original crossroad dimensions for every NPC and doorway.
-    this.add.tileSprite(0, 0, 960, 720, 'village-grass').setOrigin(0).setDepth(-2);
-    this.add.tileSprite(0, 320, 960, 82, 'village-path').setOrigin(0).setDepth(-1);
-    this.add.tileSprite(420, 0, 104, 720, 'village-path').setOrigin(0).setDepth(-1);
+    // V9.3 Part 2 hotfix: split large terrain tileSprites into small chunks.
+    // Some mobile WebGL renderers clip oversized repeating textures.
+    const tiledArea = (x, y, width, height, texture, depth) => {
+      const chunk = 64;
+      for (let cy = 0; cy < height; cy += chunk)
+        for (let cx = 0; cx < width; cx += chunk)
+          this.add.tileSprite(x + cx, y + cy,
+            Math.min(chunk, width - cx), Math.min(chunk, height - cy),
+            texture).setOrigin(0).setTilePosition(cx, cy).setDepth(depth);
+    };
+    tiledArea(0, 0, 960, 720, 'village-grass', -2);
+    tiledArea(0, 320, 960, 82, 'village-path', -1);
+    tiledArea(420, 0, 104, 720, 'village-path', -1);
     // Decorative edge stones and plants are visuals only: no new collisions.
     const edge = this.add.graphics().setDepth(0);
     edge.fillStyle(0x67895c, 0.5);
@@ -341,7 +351,24 @@ class Adventure extends Phaser.Scene {
       const fx = (i * 179 + 41) % 910 + 25, fy = (i * 113 + 67) % 660 + 25;
       if (Math.abs(fx - 470) > 100 && Math.abs(fy - 360) > 85) this.add.image(fx, fy, 'flower').setDepth(fy)
     }
-    this.add.image(730, 590, 'shrine').setDepth(595);
+    // V9.3 Part 2: decorative scenery only. No targets or collision changes.
+    // Positions deliberately avoid the crossroad, doorways, Elder and shrine.
+    for (const [fx, fy] of [
+      [100, 252], [210, 252], [595, 253], [706, 251],
+      [104, 552], [219, 553], [604, 544], [707, 542]
+    ]) this.add.image(fx, fy, 'village-planter').setDepth(fy + 1);
+    for (const [fx, fy] of [
+      [253, 158], [253, 186], [253, 214],
+      [751, 149], [751, 177], [751, 205],
+      [260, 473], [260, 501], [260, 529]
+    ]) this.add.image(fx, fy, 'village-fence').setDepth(fy + 1);
+    for (const [bx, by] of [
+      [110, 110], [245, 90], [755, 115], [815, 255],
+      [110, 430], [270, 585], [785, 465], [815, 630]
+    ]) this.add.image(bx, by, 'village-bush').setDepth(by + 1);
+    for (const [lx, ly] of [[389, 290], [551, 290], [389, 435], [551, 435]])
+      this.add.image(lx, ly, 'village-lamp').setDepth(ly + 1);
+    this.add.image(730, 590, 'village-shrine').setDepth(595);
     this.addWall(704, 590, 52, 20);
     this.crystal = this.add.image(730, 562, 'crystal').setDepth(600);
     this.tweens.add({
