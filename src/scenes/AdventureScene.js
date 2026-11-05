@@ -9,6 +9,10 @@ class Adventure extends Phaser.Scene {
     Object.entries(GAME_ART.terrain).forEach(([name, path]) => {
       this.load.image(`terrain-${name}`, path);
     });
+    // Alderbrook's terrain uses recolored samples of the same licensed art pack.
+    Object.entries(GAME_ART.village).forEach(([name, path]) => {
+      this.load.image(`village-${name}`, path);
+    });
     Object.entries(GAME_ART.hero).forEach(([name, path]) => {
       if (name.startsWith('walk')) {
         // Six 32×32 frames form each walking animation strip.
@@ -276,7 +280,7 @@ class Adventure extends Phaser.Scene {
     // Keep the original collision wall, changing only the forest artwork.
     const treeKey = this.place === 'woods'
       ? ((Math.round(x + y) % 2 === 0) ? 'forest-pinkTree' : 'forest-orangeTree')
-      : 'tree';
+      : 'village-tree';
     this.add.image(x, y, treeKey).setDepth(y + 35);
     this.addWall(x - 15, y + 7, 30, 17)
   }
@@ -308,21 +312,26 @@ class Adventure extends Phaser.Scene {
     this.place = 'village';
     this.woodsPortalShown = false;
     this.cameras.main.setBounds(0, 0, 960, 720);
-    this.add.tileSprite(0, 0, 960, 720, 'grass-detail').setOrigin(0);
-    const g = this.add.graphics();
-    g.fillStyle(0xcab389);
-    g.fillRect(0, 320, 960, 82);
-    g.fillRect(420, 0, 104, 720);
-    g.fillStyle(0xe0c99c);
-    for (let a = 0; a < 960; a += 34) {
-      g.fillRect(a, 335, 17, 3);
-      g.fillRect(a, 387, 17, 3)
+    // V9.3: licensed pixel-art terrain, matched to the Whispering Woods style.
+    // Preserve the original crossroad dimensions for every NPC and doorway.
+    this.add.tileSprite(0, 0, 960, 720, 'village-grass').setOrigin(0).setDepth(-2);
+    this.add.tileSprite(0, 320, 960, 82, 'village-path').setOrigin(0).setDepth(-1);
+    this.add.tileSprite(420, 0, 104, 720, 'village-path').setOrigin(0).setDepth(-1);
+    // Decorative edge stones and plants are visuals only: no new collisions.
+    const edge = this.add.graphics().setDepth(0);
+    edge.fillStyle(0x67895c, 0.5);
+    for (let x = 8; x < 960; x += 32) {
+      if (x < 408 || x > 535) {
+        edge.fillRect(x, 316, 13, 2);
+        edge.fillRect(x + 9, 402, 11, 2);
+      }
     }
-    for (let a = 0; a < 720; a += 28) {
-      g.fillRect(440, a, 21, 3);
-      g.fillRect(491, a + 14, 18, 3)
+    for (let y = 12; y < 720; y += 32) {
+      if (y < 307 || y > 414) {
+        edge.fillRect(417, y, 2, 12);
+        edge.fillRect(525, y + 9, 2, 11);
+      }
     }
-    g.setDepth(0);
     this.addHouse(160, 190, 'home');
     this.addHouse(650, 190, 'shop');
     this.addHouse(170, 490, 'home');
