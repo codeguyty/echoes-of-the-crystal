@@ -818,8 +818,8 @@ html,body {
 
 #saveToggle {
   position:absolute;
-  right:3%;
-  top:17%;
+  right:8px;
+  top:85px;
   z-index:12;
   border:2px solid #a9b8d2;
   background:#293b5d;
@@ -840,7 +840,7 @@ html,body {
 
 @media(orientation:landscape) and (max-height:460px) {
   #saveToggle {
-    top:17%;
+    top:85px;
     padding:3px 5px
   }
 
