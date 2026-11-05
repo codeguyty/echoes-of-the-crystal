@@ -909,6 +909,66 @@ class Adventure extends Phaser.Scene {
       r(35, 49, 12, 5, '#263c2f')
     }
   }
+  /**
+   * Add subtle, deterministic forest-floor details without changing collisions.
+   * All marks are decorative Phaser Graphics, drawn behind characters and trees.
+   * The seeded generator keeps scenery consistent after saves and map revisits.
+   */
+  drawWoodsAtmosphere() {
+    const decoration = this.add.graphics().setDepth(-0.5);
+    let seed = 9204;
+    const random = () => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed / 4294967296;
+    };
+
+    const onPath = (x, y) =>
+      (x >= 286 && x < 354) || (y >= 206 && y < 270);
+
+    // Tiny clusters of leaf litter and grasses on the forest floor.
+    // No physics bodies or interaction targets are created here.
+    const leafColors = [0x74402f, 0xc98b4d, 0xe1b16a, 0x8c563b];
+    const grassColors = [0x82713e, 0x968247, 0x6c6338];
+    for (let i = 0; i < 210; i++) {
+      const x = Math.floor(random() * 636) + 2;
+      const y = Math.floor(random() * 476) + 2;
+      if (onPath(x, y)) continue;
+      const isGrass = random() < 0.36;
+      const palette = isGrass ? grassColors : leafColors;
+      decoration.fillStyle(palette[Math.floor(random() * palette.length)], isGrass ? 0.55 : 0.66);
+      decoration.fillRect(x, y, isGrass ? 2 : 3, 1);
+      if (random() < 0.4) decoration.fillRect(x + 3, y + 2, 2, 1);
+    }
+
+    // Sparse, uneven border details soften the straight path edges while
+    // preserving the full original 68px / 64px walkable route geometry.
+    const edgeColors = [0x8e6136, 0xb58247, 0x6d5834];
+    for (let y = 12; y < 480; y += 13) {
+      if (y >= 200 && y < 277) continue;
+      for (const edgeX of [286, 354]) {
+        const x = edgeX + (edgeX === 286 ? -1 : 0);
+        decoration.fillStyle(edgeColors[Math.floor(random() * edgeColors.length)], 0.7);
+        decoration.fillRect(x + Math.floor(random() * 3) - 1, y + Math.floor(random() * 5), 2, 3);
+      }
+    }
+    for (let x = 12; x < 640; x += 15) {
+      if (x >= 280 && x < 360) continue;
+      for (const edgeY of [206, 270]) {
+        decoration.fillStyle(edgeColors[Math.floor(random() * edgeColors.length)], 0.7);
+        decoration.fillRect(x + Math.floor(random() * 6), edgeY - 1, 3, 2);
+      }
+    }
+
+    // Very light footpath texture: avoid dense or distracting patterns.
+    for (let i = 0; i < 90; i++) {
+      const vertical = random() < 0.55;
+      const x = vertical ? 290 + Math.floor(random() * 60) : Math.floor(random() * 640);
+      const y = vertical ? Math.floor(random() * 480) : 210 + Math.floor(random() * 56);
+      decoration.fillStyle(random() < 0.5 ? 0x9b4b45 : 0x5e3035, 0.35);
+      decoration.fillRect(x, y, 2, 1);
+    }
+  }
+
   /** Build the Whispering Woods area and its exploration encounters. */
   woods(x = 310, y = 410) {
     this.clearPlace();
@@ -919,6 +979,8 @@ class Adventure extends Phaser.Scene {
     this.add.tileSprite(0, 0, 640, 480, 'terrain-ground').setOrigin(0).setDepth(-2);
     this.add.tileSprite(286, 0, 68, 480, 'terrain-path').setOrigin(0).setDepth(-1);
     this.add.tileSprite(0, 206, 640, 64, 'terrain-path').setOrigin(0).setDepth(-1);
+    // V9.2d: lightweight leaf litter and softer edges; gameplay is unchanged.
+    this.drawWoodsAtmosphere();
     for (let i = 0; i < 44; i++) {
       let tx = (i * 137 + 33) % 620 + 10, ty = (i * 91 + 17) % 445 + 15;
       if (Math.abs(tx - 320) > 58 && Math.abs(ty - 238) > 54) this.addTree(tx, ty)
