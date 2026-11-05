@@ -1,4 +1,3 @@
-import { createVillageBuildingTextures } from '../art/villageBuildings.js';
 // Existing V9.1 scene preserved unchanged during structural extraction.
 class Adventure extends Phaser.Scene {
   /** Load licensed artwork before Phaser creates the scene. */

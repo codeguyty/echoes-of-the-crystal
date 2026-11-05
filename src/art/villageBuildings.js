@@ -125,7 +125,3 @@ function createVillageBuildingTextures(scene) {
 
 }
 
-);
-
-}
-
