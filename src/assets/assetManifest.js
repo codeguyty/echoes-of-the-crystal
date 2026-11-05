@@ -10,6 +10,11 @@ const GAME_ART = {
     ground: 'assets/game/forest/ground-autumn.png',
     path: 'assets/game/forest/path-autumn.png',
   },
+  village: {
+    grass: 'assets/game/village/grass.png',
+    path: 'assets/game/village/path.png',
+    tree: 'assets/game/village/tree-green.png',
+  },
   hero: {
     idleFront: 'assets/game/hero/idle-front.png',
     idleBack: 'assets/game/hero/idle-back.png',
