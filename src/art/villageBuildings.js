@@ -13,7 +13,7 @@
 
  */
 
-export function createVillageBuildingTextures(scene) {
+function createVillageBuildingTextures(scene) {
 
   const SIZE = 110;
 
@@ -122,6 +122,10 @@ export function createVillageBuildingTextures(scene) {
     door: '#9b4d7d'
 
   }, true);
+
+}
+
+);
 
 }
 
